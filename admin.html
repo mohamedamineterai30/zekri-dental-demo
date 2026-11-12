@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Agenda du cabinet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --p: #0e7c7b; --dark: #0b3b3c; --accent: #e8a33d; --line: #e4e1d9; --muted: #5f6672; }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: #f7f5f0; color: #151a22; font: 15.5px/1.5 Inter, system-ui, sans-serif; }
+  header { background: var(--dark); color: #fff; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+  header b { font-size: 17px; margin-inline-end: auto; }
+  header button { background: transparent; border: 1px solid rgba(255, 255, 255, .35); color: #fff; border-radius: 9px; padding: 7px 12px; font: inherit; cursor: pointer; }
+  main { max-width: 860px; margin: 0 auto; padding: 18px 14px 60px; }
+  .login { max-width: 340px; margin: 12vh auto; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: grid; gap: 12px; }
+  .login h1 { font-size: 20px; margin: 0; }
+  input { border: 1.5px solid var(--line); border-radius: 10px; padding: 12px; font: inherit; width: 100%; }
+  .btn { background: var(--p); color: #fff; border: 0; border-radius: 10px; padding: 12px; font: inherit; font-weight: 600; cursor: pointer; }
+  .err { color: #b3261e; margin: 0; min-height: 1.3em; font-size: 14px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .stats div { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .stats b { display: block; font-size: 26px; line-height: 1.1; }
+  .stats span { color: var(--muted); font-size: 13.5px; }
+  .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 8px; }
+  .tabs button { flex: none; border: 1.5px solid var(--line); background: #fff; border-radius: 10px; padding: 8px 12px; font: inherit; cursor: pointer; }
+  .tabs button.on { background: var(--dark); border-color: var(--dark); color: #fff; }
+  .tabs small { opacity: .7; margin-inline-start: 6px; }
+  .rdv { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 10px; display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center; }
+  .rdv.annule { opacity: .5; }
+  .time { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .who b { display: block; }
+  .who span { color: var(--muted); font-size: 14px; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2px 9px; margin-inline-start: 6px; background: #eee; }
+  .tag.nouveau { background: #fdf0d5; color: #8a5a00; }
+  .tag.confirme { background: #d9f2e4; color: #0f6b3b; }
+  .tag.venu { background: #dde7ff; color: #23408f; }
+  .acts { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .acts a, .acts button { border: 1.5px solid var(--line); background: #fff; color: inherit; border-radius: 9px; padding: 7px 10px; font: inherit; font-size: 13.5px; text-decoration: none; cursor: pointer; }
+  .acts .ok { border-color: var(--p); color: var(--p); font-weight: 600; }
+  .acts .wa { border-color: #1faa59; color: #137a3e; }
+  .empty { color: var(--muted); text-align: center; padding: 40px 0; }
+  @media (max-width: 600px) { .rdv { grid-template-columns: 58px 1fr; } .acts { grid-column: 1 / -1; justify-content: flex-start; } }
+</style>
+<script src="site.config.js"></script>
+<script src="js/acces.js"></script>
+<style>.locked body > * { display: none !important; } .locked body::before { content: "Accès privé · رابط خاص"; display: grid; place-items: center; min-height: 100vh; font: 600 18px system-ui, sans-serif; color: #5f6672; }</style>
+</head>
+<body>
+<header><b id="title">Agenda</b><button id="refresh" hidden>Actualiser</button><button id="logout" hidden>Sortir</button></header>
+<main>
+  <form class="login" id="login">
+    <h1>Agenda du cabinet</h1>
+    <input id="code" type="password" placeholder="Code du cabinet" autocomplete="current-password">
+    <p class="err" id="err"></p>
+    <button class="btn">Entrer</button>
+    <p class="err" id="hint" style="color:var(--muted)"></p>
+  </form>
+  <div id="app" hidden>
+    <div class="stats" id="stats"></div>
+    <div class="tabs" id="tabs"></div>
+    <div id="list"></div>
+  </div>
+</main>
+<script src="site.config.js"></script>
+<script src="js/slots.js"></script>
+<script src="js/api.js"></script>
+<script>
+(() => {
+  const C = globalThis.CLINIC, RDV = globalThis.RDV, API = globalThis.API;
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, props = {}, ...kids) => { const n = Object.assign(document.createElement(tag), props); n.append(...kids); return n; };
+  const DAYS = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+  const LABEL = { nouveau: "Nouveau", confirme: "Confirmé", venu: "Venu", annule: "Annulé" };
+  const s = document.documentElement.style;
+  s.setProperty("--p", C.theme.primary); s.setProperty("--dark", C.theme.dark);
+  $("title").textContent = "Agenda · " + C.name;
+  if (API.isLocal) $("hint").textContent = "Mode démo : le code est « demo ».";
+
+  let key = "", days = {}, cur = RDV.nowDZ().date;
+  try { key = sessionStorage.getItem("k") || ""; } catch {}
+
+  async function load() {
+    let res;
+    try { res = await API.call("GET", { admin: 1 }, null, key); } catch { $("err").textContent = "Connexion impossible."; return false; }
+    if (res.status !== 200) { $("err").textContent = "Code incorrect."; return false; }
+    days = res.data.days || {};
+    try { sessionStorage.setItem("k", key); } catch {}
+    $("login").hidden = true;
+    $("app").hidden = $("refresh").hidden = $("logout").hidden = false;
+    draw();
+    return true;
+  }
+
+  function draw() {
+    const today = RDV.nowDZ().date;
+    const act = (d) => (days[d] || []).filter((r) => r.status !== "annule");
+    const all = Object.keys(days).filter((d) => d >= today);
+    const stat = (n, l) => el("div", {}, el("b", { textContent: n }), el("span", { textContent: l }));
+    $("stats").replaceChildren(
+      stat(act(today).length, "aujourd'hui"),
+      stat(act(RDV.addDays(today, 1)).length, "demain"),
+      stat(all.reduce((n, d) => n + act(d).filter((r) => r.status === "nouveau").length, 0), "à confirmer"));
+    const dates = [...new Set([today, ...all])].sort();
+    if (!dates.includes(cur)) cur = today;
+    $("tabs").replaceChildren(...dates.map((d) => {
+      const b = el("button", { className: d === cur ? "on" : "" }, d === today ? "Aujourd'hui" : `${DAYS[RDV.dow(d)]} ${+d.slice(8)}/${d.slice(5, 7)}`, el("small", { textContent: act(d).length }));
+      b.onclick = () => { cur = d; draw(); };
+      return b;
+    }));
+    const list = days[cur] || [];
+    if (!list.length) return $("list").replaceChildren(el("p", { className: "empty", textContent: "Aucun rendez-vous ce jour." }));
+    $("list").replaceChildren(...list.map((r) => {
+      const svc = (C.services.find((x) => x.id === r.service) || { name: { fr: r.service } }).name.fr;
+      const set = (status, label, cls = "") => { const b = el("button", { textContent: label, className: cls }); b.onclick = () => update(r, status); return b; };
+      const intl = "213" + r.phone.slice(1);
+      const msg = `Bonjour ${r.name}, ${C.name} vous confirme votre rendez-vous le ${+r.date.slice(8)}/${r.date.slice(5, 7)} à ${r.time} (${svc}). Merci de nous prévenir en cas d'empêchement.`;
+      const acts = el("div", { className: "acts" },
+        el("a", { href: "tel:" + r.phone, textContent: "Appeler" }),
+        el("a", { href: `https://wa.me/${intl}?text=${encodeURIComponent(msg)}`, target: "_blank", rel: "noopener", className: "wa", textContent: "WhatsApp" }));
+      if (r.status === "nouveau") acts.append(set("confirme", "Confirmer", "ok"));
+      if (r.status === "confirme") acts.append(set("venu", "Venu", "ok"));
+      if (r.status !== "annule") acts.append(set("annule", "Annuler"));
+      else acts.append(set("nouveau", "Rétablir"));
+      return el("div", { className: "rdv " + r.status },
+        el("div", { className: "time", textContent: r.time }),
+        el("div", { className: "who" }, el("b", {}, r.name, el("span", { className: "tag " + r.status, textContent: LABEL[r.status] })), el("span", { textContent: `${svc} · ${r.phone}` })),
+        acts);
+    }));
+  }
+
+  async function update(r, status) {
+    try {
+      const res = await API.call("PATCH", {}, { date: r.date, id: r.id, status }, key);
+      if (res.data.ok) r.status = status;
+    } catch {}
+    draw();
+  }
+
+  $("login").onsubmit = (e) => { e.preventDefault(); $("err").textContent = ""; key = $("code").value.trim(); load(); };
+  $("refresh").onclick = load;
+  $("logout").onclick = () => { try { sessionStorage.removeItem("k"); } catch {} location.reload(); };
+  if (key) load();
+})();
+</script>
+</body>
+</html>

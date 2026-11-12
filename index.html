@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cabinet</title>
+<meta name="description" content="">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Cormorant+Garamond:wght@500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script src="site.config.js"></script>
+<script src="js/acces.js"></script>
+<style>.locked body > * { display: none !important; } .locked body::before { content: "Accès privé · رابط خاص"; display: grid; place-items: center; min-height: 100vh; font: 600 18px system-ui, sans-serif; color: #5f6672; }</style>
+</head>
+<body>
+
+<div class="demo-bar" id="demoBar" hidden></div>
+
+<header class="top">
+  <a class="brand" href="#"><span class="logo" id="logo"></span><span><b id="brandName"></b><small id="brandSub"></small></span></a>
+  <nav>
+    <a href="#soins" data-t="navSoins"></a>
+    <a href="#cabinet" data-t="navCabinet"></a>
+    <a href="#infos" data-t="navInfos"></a>
+  </nav>
+  <button class="lang" id="lang" type="button"></button>
+  <a class="btn small" href="#rdv" data-t="cta"></a>
+</header>
+
+<main>
+  <div class="hero-bg">
+  <section class="hero">
+    <div class="hero-text">
+      <p class="eyebrow" id="eyebrow"></p>
+      <h1 id="tagline"></h1>
+      <p class="lead" id="intro"></p>
+      <div class="needs" id="needs"></div>
+      <ul class="points" id="points"></ul>
+      <div class="proof" id="proof"></div>
+      <p class="open" id="openNow"></p>
+    </div>
+
+    <div class="card book" id="rdv">
+      <form id="form" novalidate>
+        <h2 data-t="bookTitle"></h2>
+        <p class="step"><span>1</span><b data-t="s1"></b></p>
+        <div class="chips" id="services"></div>
+        <p class="step"><span>2</span><b data-t="s2"></b></p>
+        <div class="days" id="days"></div>
+        <p class="step"><span>3</span><b data-t="s3"></b></p>
+        <div class="slots" id="slots"></div>
+        <p class="step"><span>4</span><b data-t="s4"></b></p>
+        <div class="fields">
+          <input id="name" name="name" autocomplete="name" maxlength="60" required>
+          <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="14" dir="ltr" required>
+          <input name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        </div>
+        <p class="err" id="err" role="alert"></p>
+        <button class="btn big" id="submit" type="submit" data-t="submit"></button>
+        <p class="fine" data-t="fine"></p>
+      </form>
+      <div class="done" id="done" hidden>
+        <div class="check">✓</div>
+        <h2 data-t="doneTitle"></h2>
+        <p class="recap" id="recap"></p>
+        <a class="btn big wa" id="waConfirm" target="_blank" rel="noopener" data-t="doneWa"></a>
+        <button class="link" id="again" type="button" data-t="again"></button>
+      </div>
+    </div>
+  </section>
+  </div>
+
+  <section class="film" id="film" hidden>
+    <video id="filmVideo" muted loop playsinline preload="metadata"></video>
+    <div class="film-text">
+      <div>
+        <h2 class="h" id="filmTitle"></h2>
+        <p id="filmText"></p>
+        <a class="btn small" href="#rdv" data-t="cta"></a>
+      </div>
+    </div>
+  </section>
+
+  <section id="soins" class="wrap">
+    <h2 class="h" data-t="soinsTitle"></h2>
+    <div class="grid" id="serviceCards"></div>
+  </section>
+
+  <section class="method-bg" id="methodSec" hidden>
+    <div class="wrap">
+      <h2 class="h" id="methodTitle"></h2>
+      <p class="quote" id="methodQuote"></p>
+      <ol class="method" id="method"></ol>
+    </div>
+  </section>
+
+  <section class="wrap" id="gallerySec" hidden>
+    <h2 class="h" data-t="galleryTitle"></h2>
+    <div class="gallery" id="gallery"></div>
+  </section>
+
+  <section id="cabinet" class="wrap about">
+    <div class="portrait" id="portrait"></div>
+    <div>
+      <h2 class="h" id="docName"></h2>
+      <p class="muted" id="docTitle"></p>
+      <p id="docBio"></p>
+      <a class="btn ghost" id="igLink" target="_blank" rel="noopener"></a>
+    </div>
+  </section>
+
+  <section id="infos" class="wrap infos">
+    <div class="card">
+      <h3 data-t="hoursTitle"></h3>
+      <table class="hours" id="hours"></table>
+    </div>
+    <div class="card">
+      <h3 data-t="addrTitle"></h3>
+      <p id="address"></p>
+      <a class="btn ghost" id="mapLink" target="_blank" rel="noopener" data-t="map"></a>
+      <h3 data-t="contactTitle"></h3>
+      <p><a class="tel" id="telLink" dir="ltr"></a></p>
+      <a class="btn wa" id="waLink" target="_blank" rel="noopener" data-t="wa"></a>
+    </div>
+    <div class="card">
+      <h3 data-t="faqTitle"></h3>
+      <div id="faq"></div>
+    </div>
+  </section>
+</main>
+
+<footer><span id="foot"></span></footer>
+
+<div class="bar">
+  <a id="barTel" data-t="call"></a>
+  <a id="barWa" class="wa" target="_blank" rel="noopener">WhatsApp</a>
+  <a href="#rdv" class="main" data-t="ctaShort"></a>
+</div>
+
+<script src="site.config.js"></script>
+<script src="js/slots.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
